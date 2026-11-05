@@ -8,8 +8,13 @@ An academic Computer Vision project (DL-004) using TensorFlow/Keras, MobileNetV2
 [![Flask](https://img.shields.io/badge/Flask-3.0-000000)](https://flask.palletsprojects.com/)
 [![Dataset](https://img.shields.io/badge/Dataset-PlantVillage-2f6b3c)](https://github.com/spMohanty/PlantVillage-Dataset)
 [![Licence](https://img.shields.io/badge/Images-CC%20BY--SA%203.0-4c9a2a)](dataset/SOURCE.md)
+[![Live demo](https://img.shields.io/badge/Live%20demo-Render-46E3B7)](https://leafguard-ai-ftin.onrender.com)
+
+**Live demo:** <https://leafguard-ai-ftin.onrender.com>
 
 > **Academic prototype.** LeafGuard AI is not a diagnostic device and is not a replacement for an agricultural expert. Confidence is a model score, not a guarantee.
+
+> The live demo runs on Render's free tier and may take a few seconds to wake after inactivity.
 
 ---
 
@@ -211,7 +216,9 @@ LeafGuard-AI/
 ├── evaluate.py                  held-out evaluation and plots
 ├── predict.py                   command-line prediction
 ├── dataset_prep.py              cleaning, 224 resize, dedup and split
-├── requirements.txt
+├── requirements.txt             full local/training dependencies
+├── requirements-render.txt      lightweight ONNX production dependencies
+├── render.yaml                  Render blueprint
 ├── README.md
 ├── LICENSE
 ├── sitecustomize.py             optional local vendor path hook
@@ -228,7 +235,8 @@ LeafGuard-AI/
 ├── docs/screenshots/             real application screenshots
 ├── scripts/
 │   ├── download_dataset.py
-│   └── build_manifest.py
+│   ├── build_manifest.py
+│   └── export_onnx.py
 ├── utils/
 │   ├── labels.py
 │   ├── image_quality.py
@@ -296,6 +304,7 @@ python train.py --rebuild-features
 ### Train output
 
 - `models/leafguard_mobilenetv2.keras` — complete inference model
+- `models/leafguard_mobilenetv2.onnx` — lightweight deployment model
 - `models/class_names.json`, `label_map.json`, `preprocessing.json`
 - `models/model_metadata.json`
 - `results/training_history.json`, `training_head_log.csv`, `model_summary.txt`
@@ -335,6 +344,36 @@ server and change the Flask secret key.
 python predict.py path\to\leaf.jpg --plant Tomato
 python predict.py path\to\leaf.jpg --json
 ```
+
+### Deploy on Render
+
+The project is live at **<https://leafguard-ai-ftin.onrender.com>** on Render's
+free web-service tier.
+
+| Setting | Value |
+|---|---|
+| Repository | `mauryadeepa7078-ux/Plant-Leaf-Disease-Classification-Deep-Learning-Project` |
+| Branch | `main` |
+| Runtime | Python 3.11.9 |
+| Build command | `pip install -r requirements-render.txt` |
+| Start command | `gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 120 app:app` |
+| Health check | `/health` |
+| Plan / region | Free / Oregon |
+
+Render runs a lightweight **ONNX Runtime** backend instead of TensorFlow:
+`models/leafguard_mobilenetv2.onnx` (10.3 MB) has the same weights and produced
+a maximum difference of `0.00000459` versus the Keras model on real test
+images. TensorFlow is still used locally for training and evaluation; Render
+only installs the small production dependency set in `requirements-render.txt`.
+
+To recreate the ONNX file:
+
+```powershell
+python scripts/export_onnx.py
+```
+
+`render.yaml` is included for blueprint-based deployment. The deployed service
+is also configured through the Render API.
 
 ## 13. Tests
 

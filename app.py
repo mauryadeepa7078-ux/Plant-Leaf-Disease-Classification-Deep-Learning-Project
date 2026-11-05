@@ -284,10 +284,13 @@ def results_file(filename: str):
 
 @app.route("/health")
 def health():
+    onnx_path = MODEL_PATH.with_suffix(".onnx")
     return {
         "status": "ok",
-        "model_ready": MODEL_PATH.exists(),
+        "model_ready": MODEL_PATH.exists() or onnx_path.exists(),
+        "inference_backend": "onnx" if onnx_path.exists() else "keras",
         "model_path": str(MODEL_PATH),
+        "onnx_model_path": str(onnx_path),
         "classes": len(CLASS_NAMES),
         "plants": PLANTS,
     }
