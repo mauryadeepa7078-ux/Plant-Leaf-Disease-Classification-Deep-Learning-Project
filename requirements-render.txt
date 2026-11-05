@@ -1,0 +1,7 @@
+# Lightweight production requirements for Render (ONNX Runtime, no TensorFlow)
+Flask==3.0.3
+Werkzeug==3.0.3
+numpy==1.26.4
+Pillow==10.4.0
+onnxruntime==1.20.1
+gunicorn==22.0.0

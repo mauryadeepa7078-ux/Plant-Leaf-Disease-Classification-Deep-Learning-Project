@@ -33,33 +33,67 @@ class ModelNotReadyError(RuntimeError):
 class LeafGuardPredictor:
     """Thread-safe, lazily loaded model wrapper."""
 
-    def __init__(self, model_path: str | Path = MODEL_PATH) -> None:
+    def __init__(
+        self,
+        model_path: str | Path = MODEL_PATH,
+        onnx_path: str | Path | None = None,
+    ) -> None:
         self.model_path = Path(model_path)
+        self.onnx_path = (
+            Path(onnx_path)
+            if onnx_path is not None
+            else self.model_path.with_suffix(".onnx")
+        )
         self._model = None
+        self._session = None
+        self._input_name: str | None = None
+        self._backend: str | None = None
         self._lock = threading.Lock()
         self.loaded_at: float | None = None
         self.class_names: list[str] = list(CLASS_NAMES)
 
     @property
     def is_ready(self) -> bool:
-        return self.model_path.exists()
+        return self.onnx_path.exists() or self.model_path.exists()
 
     def load(self) -> None:
-        if self._model is not None:
+        if self._backend is not None:
             return
-        if not self.model_path.exists():
+        if not self.is_ready:
             raise ModelNotReadyError(
-                f"Model not found at {self.model_path}. Run `python train.py` first."
+                f"Model not found at {self.model_path} or {self.onnx_path}. "
+                "Run `python train.py` first."
             )
 
-        # Imported here so dataset tools and the website can start even before
-        # TensorFlow is installed (the error is clearer when a prediction is
-        # actually requested).
-        import tensorflow as tf
-
         with self._lock:
-            if self._model is not None:
+            if self._backend is not None:
                 return
+
+            # ONNX Runtime is much lighter than TensorFlow and is the preferred
+            # backend for deployment (for example on a 512 MB Render instance).
+            if self.onnx_path.exists():
+                import onnxruntime as ort
+
+                session = ort.InferenceSession(
+                    str(self.onnx_path), providers=["CPUExecutionProvider"]
+                )
+                outputs = session.get_outputs()
+                if not outputs or outputs[0].shape[-1] not in (
+                    len(CLASS_NAMES),
+                    "16",
+                ):
+                    raise ModelNotReadyError(
+                        f"ONNX model output {outputs[0].shape} does not match 16 classes."
+                    )
+                self._session = session
+                self._input_name = session.get_inputs()[0].name
+                self._backend = "onnx"
+                self.loaded_at = time.time()
+                return
+
+            # Development fallback when only the Keras file is available.
+            import tensorflow as tf
+
             model = tf.keras.models.load_model(self.model_path)
             output_shape = model.output_shape
             if not output_shape or output_shape[-1] != len(CLASS_NAMES):
@@ -67,11 +101,13 @@ class LeafGuardPredictor:
                     f"Model outputs {output_shape}, expected {len(CLASS_NAMES)} classes."
                 )
             self._model = model
+            self._backend = "keras"
             self.loaded_at = time.time()
 
     def metadata(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
-            "model_path": str(self.model_path),
+            "model_path": str(self.onnx_path if self._backend == "onnx" else self.model_path),
+            "backend": self._backend or "not_loaded",
             "class_count": len(self.class_names),
             "input_size": [224, 224, 3],
             "preprocessing": "RGB, 224x224, raw 0-255; rescaling is inside the model",
@@ -90,14 +126,21 @@ class LeafGuardPredictor:
     ) -> dict[str, Any]:
         """Run a real forward pass and return a transparent prediction object."""
         self.load()
-        assert self._model is not None
 
         quality = image_quality_metrics(image)
         batch = prepare_model_input(image)
         started = time.perf_counter()
-        probabilities = np.asarray(
-            self._model(batch, training=False), dtype=np.float32
-        ).reshape(-1)
+        if self._backend == "onnx":
+            assert self._session is not None and self._input_name is not None
+            output = self._session.run(
+                None, {self._input_name: batch.astype(np.float32)}
+            )[0]
+            probabilities = np.asarray(output, dtype=np.float32).reshape(-1)
+        else:
+            assert self._model is not None
+            probabilities = np.asarray(
+                self._model(batch, training=False), dtype=np.float32
+            ).reshape(-1)
         latency_ms = (time.perf_counter() - started) * 1000.0
 
         if probabilities.size != len(CLASS_NAMES):

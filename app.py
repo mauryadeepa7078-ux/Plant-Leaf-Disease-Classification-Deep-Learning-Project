@@ -71,7 +71,9 @@ ensure_directories()
 app = Flask(__name__)
 app.config.update(
     MAX_CONTENT_LENGTH=MAX_UPLOAD_BYTES + 64 * 1024,
-    SECRET_KEY="leafguard-ai-local-development-key-change-in-production",
+    SECRET_KEY=os.environ.get(
+        "SECRET_KEY", "leafguard-ai-local-development-key-change-in-production"
+    ),
     JSON_SORT_KEYS=False,
 )
 app.jinja_env.trim_blocks = True
