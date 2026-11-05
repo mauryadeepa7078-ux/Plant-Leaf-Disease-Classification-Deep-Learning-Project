@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section error-page">
+  <div class="container error-inner">
+    <span class="error-code">500</span>
+    <span class="eyebrow">Something went wrong</span>
+    <h1>The server could not finish that request.</h1>
+    <p>Check the terminal running Flask for the traceback. The detection page and saved results may still be available.</p>
+    <div class="hero-actions">
+      <a class="button button--primary" href="{{ url_for('detect') }}">Try detection</a>
+      <a class="button button--ghost" href="{{ url_for('home') }}">Go home</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

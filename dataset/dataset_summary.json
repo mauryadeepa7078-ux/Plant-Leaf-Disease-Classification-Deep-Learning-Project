@@ -1,0 +1,90 @@
+{
+  "dataset_name": "PlantVillage 16-class subset",
+  "source": "https://github.com/spMohanty/PlantVillage-Dataset",
+  "license": "CC BY-SA 3.0",
+  "generated_at_utc": "2026-11-05T04:23:34.430604+00:00",
+  "seed": 42,
+  "image_size": [
+    224,
+    224
+  ],
+  "raw_images_found": 4000,
+  "corrupt_images_removed": 0,
+  "exact_duplicates_removed": 0,
+  "near_duplicate_groups": 3,
+  "near_duplicate_images_grouped": 6,
+  "total_images": 4000,
+  "plant_types": 4,
+  "classes": 16,
+  "classes_per_plant": {
+    "Tomato": 4,
+    "Apple": 4,
+    "Grape": 4,
+    "Corn": 4
+  },
+  "images_per_class": {
+    "Apple Black Rot": 250,
+    "Apple Cedar Apple Rust": 250,
+    "Apple Healthy": 250,
+    "Apple Scab": 250,
+    "Corn Cercospora Leaf Spot": 250,
+    "Corn Common Rust": 250,
+    "Corn Healthy": 250,
+    "Corn Northern Leaf Blight": 250,
+    "Grape Black Rot": 250,
+    "Grape Esca": 250,
+    "Grape Healthy": 250,
+    "Grape Leaf Blight": 250,
+    "Tomato Bacterial Spot": 250,
+    "Tomato Early Blight": 250,
+    "Tomato Healthy": 250,
+    "Tomato Late Blight": 250
+  },
+  "split_counts": {
+    "train": 2801,
+    "validation": 600,
+    "test": 599
+  },
+  "split_percentages": {
+    "train": 70.03,
+    "validation": 15.0,
+    "test": 14.97
+  },
+  "plant_distribution": {
+    "Apple": {
+      "train": 700,
+      "validation": 152,
+      "test": 148,
+      "total": 1000
+    },
+    "Corn": {
+      "train": 701,
+      "validation": 146,
+      "test": 153,
+      "total": 1000
+    },
+    "Grape": {
+      "train": 701,
+      "validation": 152,
+      "test": 147,
+      "total": 1000
+    },
+    "Tomato": {
+      "train": 699,
+      "validation": 150,
+      "test": 151,
+      "total": 1000
+    }
+  },
+  "class_imbalance_ratio": 1.0,
+  "class_imbalance_note": "Balanced (max/min <= 1.25).",
+  "duplicate_check": {
+    "group_leaks": 0,
+    "exact_hash_leaks": 0,
+    "bad_groups": [],
+    "bad_hashes": [],
+    "passed": true
+  },
+  "corrupt_files": [],
+  "split_method": "StratifiedGroupKFold(n_splits=20); folds 0-13 train, 14-16 validation, 17-19 test; near-duplicate groups kept together."
+}

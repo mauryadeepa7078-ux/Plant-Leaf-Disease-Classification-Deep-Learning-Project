@@ -1,0 +1,22 @@
+                           precision    recall  f1-score   support
+
+           Tomato Healthy       0.95      1.00      0.97        37
+      Tomato Early Blight       0.85      0.78      0.82        37
+       Tomato Late Blight       0.89      0.89      0.89        38
+    Tomato Bacterial Spot       0.93      0.95      0.94        39
+            Apple Healthy       0.97      0.97      0.97        37
+               Apple Scab       1.00      0.95      0.97        37
+          Apple Black Rot       0.97      1.00      0.99        38
+   Apple Cedar Apple Rust       0.97      1.00      0.99        36
+            Grape Healthy       1.00      1.00      1.00        37
+          Grape Black Rot       1.00      1.00      1.00        36
+               Grape Esca       1.00      1.00      1.00        37
+        Grape Leaf Blight       1.00      1.00      1.00        37
+             Corn Healthy       1.00      1.00      1.00        38
+         Corn Common Rust       1.00      1.00      1.00        38
+Corn Northern Leaf Blight       0.94      0.85      0.89        39
+Corn Cercospora Leaf Spot       0.86      0.95      0.90        38
+
+                 accuracy                           0.96       599
+                macro avg       0.96      0.96      0.96       599
+             weighted avg       0.96      0.96      0.96       599

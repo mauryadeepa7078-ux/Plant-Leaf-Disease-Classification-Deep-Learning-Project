@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow"><span class="pulse-dot"></span> AI-assisted plant health screening</span>
+      <h1>See what your leaves are <span class="highlight">telling you.</span></h1>
+      <p class="hero-lede">LeafGuard AI uses a trained MobileNetV2 model to classify <strong>16 leaf conditions</strong> across tomato, apple, grape and corn — with a transparent confidence score and an honest “uncertain” result when the image is unclear.</p>
+      <div class="hero-actions">
+        <a class="button button--primary button--large" href="{{ url_for('detect') }}">
+          Start detection
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a class="button button--ghost button--large" href="{{ url_for('performance') }}">See real model results</a>
+      </div>
+      <div class="hero-trust">
+        <div><strong>4</strong><span>crop species</span></div>
+        <div><strong>16</strong><span>leaf classes</span></div>
+        <div><strong>{{ metrics.test_images if metrics.test_images else "—" }}</strong><span>held-out test images</span></div>
+        {% if metrics.accuracy is defined and metrics.accuracy %}
+          <div><strong>{{ metrics.accuracy|percentage }}</strong><span>test accuracy</span></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-label="Examples from the four supported crops">
+      <div class="visual-panel">
+        <div class="visual-panel__top">
+          <span class="status-pill {{ 'status-pill--ok' if model_ready else 'status-pill--wait' }}">
+            <span class="status-dot"></span>{{ "Model ready" if model_ready else "Model awaiting training" }}
+          </span>
+          <span class="mono-label">MobileNetV2 · 224 × 224</span>
+        </div>
+        <div class="crop-collage">
+          {% for plant in PLANTS %}
+            <figure class="collage-item crop-{{ plant|lower }}">
+              <img src="{{ url_for('static', filename='images/' ~ plant|lower ~ '.jpg') }}" alt="{{ plant }} leaf example" loading="lazy" onerror="this.classList.add('is-missing')">
+              <figcaption>{{ plant }}</figcaption>
+            </figure>
+          {% endfor %}
+          <div class="collage-centre">
+            <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M39 9C26 9 14 15 11 26c-1.4 5.1.7 9 4.6 10.6 7 2.7 15-2.1 18-9 2.7-6 3.6-12 5.4-18.6Z" fill="currentColor"/><path d="M14 36c4.4-8 10.4-13 18.6-17" fill="none" stroke="#f5fbf4" stroke-width="2.4" stroke-linecap="round"/></svg>
+            <span>4 crops<br><strong>16 classes</strong></span>
+          </div>
+        </div>
+        <div class="visual-panel__bottom">
+          <div class="mini-check"><span>✓</span> Real trained model</div>
+          <div class="mini-check"><span>✓</span> Low-confidence safeguard</div>
+          <div class="mini-check"><span>✓</span> Held-out evaluation</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="section-heading section-heading--split">
+      <div>
+        <span class="eyebrow">Supported crops</span>
+        <h2>Four crops. Four conditions each.</h2>
+        <p>Every plant below has exactly four trained classes, including a healthy reference class.</p>
+      </div>
+      <a class="text-link" href="{{ url_for('about') }}">See the full class list <span>→</span></a>
+    </div>
+
+    <div class="plant-grid">
+      {% for plant in PLANTS %}
+        {% set meta = PLANT_META[plant] %}
+        <article class="plant-card" style="--plant-colour: {{ meta.colour }}; --plant-soft: {{ meta.soft }};">
+          <div class="plant-card__image">
+            <img src="{{ url_for('static', filename='images/' ~ plant|lower ~ '.jpg') }}" alt="{{ plant }} leaf" loading="lazy" onerror="this.style.display='none'; this.parentElement.classList.add('is-missing')">
+            <span class="plant-card__count">4 classes</span>
+          </div>
+          <div class="plant-card__body">
+            <div class="plant-card__heading">
+              <div>
+                <h3>{{ plant }}</h3>
+                <p class="latin">{{ meta.latin }}</p>
+              </div>
+              <span class="plant-dot"></span>
+            </div>
+            <ul class="class-tags">
+              {% for item in PLANT_CLASSES[plant] %}
+                <li class="{{ 'is-healthy' if item.healthy }}">{{ item.disease }}</li>
+              {% endfor %}
+            </ul>
+            <a class="card-link" href="{{ url_for('detect', plant=plant) }}">Detect {{ plant|lower }} leaf <span>→</span></a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section--soft">
+  <div class="container">
+    <div class="section-heading centred">
+      <span class="eyebrow">How it works</span>
+      <h2>From photo to a careful result</h2>
+      <p>No random predictions and no hard-coded answers. Every result is a forward pass through the trained network.</p>
+    </div>
+    <div class="steps-grid">
+      <article class="step-card">
+        <span class="step-number">01</span>
+        <div class="step-icon">🌱</div>
+        <h3>Choose the crop</h3>
+        <p>Select tomato, apple, grape or corn so the result can be checked against your chosen plant.</p>
+      </article>
+      <article class="step-card">
+        <span class="step-number">02</span>
+        <div class="step-icon">📷</div>
+        <h3>Upload a leaf photo</h3>
+        <p>Use a clear, well-lit JPG, PNG or WEBP. A single leaf with visible symptoms works best.</p>
+      </article>
+      <article class="step-card">
+        <span class="step-number">03</span>
+        <div class="step-icon">🔎</div>
+        <h3>Read a transparent result</h3>
+        <p>See the predicted plant and condition, model confidence, top alternatives and an uncertainty warning when needed.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="honesty-panel">
+      <div class="honesty-panel__content">
+        <span class="eyebrow eyebrow--light">Built for honest use</span>
+        <h2>Accuracy is measured, not invented.</h2>
+        <p>The model is evaluated on a separate 15% test split that it never saw during training. If the model is not confident, LeafGuard AI says so instead of forcing a disease label.</p>
+        <div class="honesty-actions">
+          <a class="button button--light" href="{{ url_for('performance') }}">View metrics &amp; confusion matrix</a>
+          <a class="text-link text-link--light" href="{{ url_for('about') }}#limitations">Read the limitations <span>→</span></a>
+        </div>
+      </div>
+      <div class="honesty-stats">
+        <div><span>Split</span><strong>70 / 15 / 15</strong><small>train / validation / test</small></div>
+        <div><span>Leakage control</span><strong>Grouped</strong><small>near-duplicate leaves stay together</small></div>
+        <div><span>Evaluation</span><strong>16 classes</strong><small>per-class precision, recall &amp; F1</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container cta-band">
+    <div>
+      <span class="eyebrow">Ready to try it?</span>
+      <h2>Give your leaf a second look.</h2>
+      <p>Upload a photo and explore the model’s actual output — including its uncertainty.</p>
+    </div>
+    <a class="button button--primary button--large" href="{{ url_for('detect') }}">Open the detector <span>→</span></a>
+  </div>
+</section>
+{% endblock %}

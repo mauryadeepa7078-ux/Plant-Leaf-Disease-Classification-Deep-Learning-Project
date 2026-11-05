@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section error-page">
+  <div class="container error-inner">
+    <span class="error-code">404</span>
+    <span class="eyebrow">Off the trail</span>
+    <h1>This page could not be found.</h1>
+    <p>The link may be old, or the result may have been removed. Head back to the detector and try a leaf photo.</p>
+    <div class="hero-actions">
+      <a class="button button--primary" href="{{ url_for('detect') }}">Open detection</a>
+      <a class="button button--ghost" href="{{ url_for('home') }}">Go home</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

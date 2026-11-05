@@ -1,0 +1,30 @@
+TensorFlow: 2.16.1
+Input: 224x224x3 RGB, 0-255; rescaling inside model
+Backbone: MobileNetV2, ImageNet weights, frozen
+Head: BatchNorm -> Dense 256 ReLU (L2) -> Dropout 0.40 -> Dense 16 softmax
+Classes: 16
+Model: "leafguard_mobilenetv2"
++--------------------------------------------------------------------------+
+| Layer (type)                    | Output Shape           |       Param # |
+|---------------------------------+------------------------+---------------|
+| leaf_rgb_0_255 (InputLayer)     | (None, 224, 224, 3)    |             0 |
+|---------------------------------+------------------------+---------------|
+| training_augmentation           | (None, 224, 224, 3)    |             0 |
+| (Sequential)                    |                        |               |
+|---------------------------------+------------------------+---------------|
+| mobilenet_preprocess            | (None, 224, 224, 3)    |             0 |
+| (Rescaling)                     |                        |               |
+|---------------------------------+------------------------+---------------|
+| mobilenetv2_1.00_224            | (None, 7, 7, 1280)     |     2,257,984 |
+| (Functional)                    |                        |               |
+|---------------------------------+------------------------+---------------|
+| global_average_pooling          | (None, 1280)           |             0 |
+| (GlobalAveragePooling2D)        |                        |               |
+|---------------------------------+------------------------+---------------|
+| leafguard_classifier_head       | (None, 16)             |       337,168 |
+| (Functional)                    |                        |               |
++--------------------------------------------------------------------------+
+ Total params: 2,595,152 (9.90 MB)
+ Trainable params: 334,608 (1.28 MB)
+ Non-trainable params: 2,260,544 (8.62 MB)
+

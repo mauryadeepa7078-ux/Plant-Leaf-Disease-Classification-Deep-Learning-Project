@@ -1,0 +1,41 @@
+{
+  "input_size": [
+    224,
+    224
+  ],
+  "color_mode": "RGB",
+  "resize_interpolation": "PIL LANCZOS",
+  "input_value_range": [
+    0.0,
+    255.0
+  ],
+  "normalization": "Rescaling(1/127.5, offset=-1) inside the model",
+  "output": "16-class softmax",
+  "class_order": [
+    "Tomato Healthy",
+    "Tomato Early Blight",
+    "Tomato Late Blight",
+    "Tomato Bacterial Spot",
+    "Apple Healthy",
+    "Apple Scab",
+    "Apple Black Rot",
+    "Apple Cedar Apple Rust",
+    "Grape Healthy",
+    "Grape Black Rot",
+    "Grape Esca",
+    "Grape Leaf Blight",
+    "Corn Healthy",
+    "Corn Common Rust",
+    "Corn Northern Leaf Blight",
+    "Corn Cercospora Leaf Spot"
+  ],
+  "training_mode": "frozen MobileNetV2 feature extraction + trained head",
+  "augmentation": [
+    "horizontal flip",
+    "rotation 7%",
+    "zoom 10%",
+    "translation 5%",
+    "contrast 12%",
+    "brightness 10%"
+  ]
+}

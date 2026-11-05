@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+vendor/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Downloaded data and trained artefacts (recreate with the documented commands)
+dataset/raw/
+dataset/processed_224/
+dataset/quarantine/
+dataset/.file_listings/
+models/*.keras
+!models/leafguard_mobilenetv2.keras
+models/*.h5
+models/*.npz
+
+# Runtime uploads / saved results
+static/uploads/
+instance/
+uploads/
+
+# Temporary logs / browser profiles / IDE files
+*.log
+.chrome-profile/
+_result_preview.html
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local wheelhouse
+wheelhouse/

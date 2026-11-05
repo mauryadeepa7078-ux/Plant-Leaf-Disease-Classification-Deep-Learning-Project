@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-hero page-hero--compact">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="{{ url_for('home') }}">Home</a><span>/</span><span>Detect</span></nav>
+    <span class="eyebrow">Leaf detection</span>
+    <h1>Check a leaf with the trained model.</h1>
+    <p class="page-lede">Select the crop, upload one clear leaf photo and LeafGuard AI will return its best prediction, confidence and top alternatives. Nothing is hard-coded.</p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container detect-layout">
+    <form class="detect-form" action="{{ url_for('predict') }}" method="post" enctype="multipart/form-data" data-detect-form>
+      <div class="form-section">
+        <div class="form-section__heading">
+          <span class="form-step">1</span>
+          <div>
+            <h2>Which plant is it?</h2>
+            <p>Choosing a plant lets us warn you if the model predicts a different crop.</p>
+          </div>
+        </div>
+        <div class="plant-select-grid" role="radiogroup" aria-label="Select plant">
+          {% for plant in PLANTS %}
+            {% set meta = PLANT_META[plant] %}
+            <label class="plant-select" style="--plant-colour: {{ meta.colour }}; --plant-soft: {{ meta.soft }};">
+              <input type="radio" name="plant" value="{{ plant }}" {{ 'checked' if selected_plant == plant }} data-plant-radio>
+              <span class="plant-select__inner">
+                <span class="plant-select__image">
+                  <img src="{{ url_for('static', filename='images/' ~ plant|lower ~ '.jpg') }}" alt="" loading="lazy" onerror="this.style.display='none'">
+                </span>
+                <span class="plant-select__text">
+                  <strong>{{ plant }}</strong>
+                  <small>4 classes</small>
+                </span>
+                <span class="plant-select__check" aria-hidden="true">✓</span>
+              </span>
+            </label>
+          {% endfor %}
+          <label class="plant-select plant-select--skip">
+            <input type="radio" name="plant" value="" {{ 'checked' if not selected_plant }} data-plant-radio>
+            <span class="plant-select__inner">
+              <span class="plant-select__text">
+                <strong>Not sure</strong>
+                <small>Let the model decide</small>
+              </span>
+              <span class="plant-select__check" aria-hidden="true">✓</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section__heading">
+          <span class="form-step">2</span>
+          <div>
+            <h2>Upload a leaf photo</h2>
+            <p>JPG, PNG or WEBP · up to 8 MB · one leaf filling most of the frame.</p>
+          </div>
+        </div>
+
+        <div class="upload-area" data-upload-area>
+          <input type="file" id="leaf-image" name="image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required data-file-input>
+          <label for="leaf-image" class="upload-label" data-upload-label>
+            <span class="upload-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><path d="M24 31V13m0 0-7 7m7-7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 29v5a3 3 0 0 0 3 3h22a3 3 0 0 0 3-3v-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            </span>
+            <strong>Drop a leaf photo here</strong>
+            <span>or <u>browse your files</u></span>
+            <small data-upload-hint>Make sure the leaf is in focus and well lit.</small>
+          </label>
+          <div class="upload-preview" data-upload-preview hidden>
+            <img alt="Preview of the uploaded leaf" data-preview-image>
+            <div class="upload-preview__meta">
+              <div>
+                <strong data-preview-name></strong>
+                <span data-preview-details></span>
+              </div>
+              <button type="button" class="button button--quiet button--small" data-clear-file>Remove</button>
+            </div>
+          </div>
+        </div>
+
+        {% if not model_ready %}
+          <div class="notice notice--warning">
+            <strong>Model not found.</strong> Train the classifier with <code>python train.py</code> before using detection.
+          </div>
+        {% endif %}
+
+        <div class="submit-row">
+          <button class="button button--primary button--large" type="submit" data-submit-button {{ 'disabled' if not model_ready }}>
+            <span data-submit-label>Analyse leaf</span>
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <p class="submit-note">Your image is processed locally by this Flask app. It is not sent to a third-party service.</p>
+        </div>
+      </div>
+    </form>
+
+    <aside class="detect-aside">
+      <div class="aside-card">
+        <span class="eyebrow">For a better result</span>
+        <h3>Photo checklist</h3>
+        <ul class="check-list">
+          <li><span>✓</span> One leaf, filling most of the frame</li>
+          <li><span>✓</span> Soft, even daylight — avoid deep shadows</li>
+          <li><span>✓</span> Hold steady so the symptoms are sharp</li>
+          <li><span>✓</span> Keep the leaf against a plain background</li>
+          <li><span>✓</span> Avoid screenshots, drawings or blurry photos</li>
+        </ul>
+      </div>
+      <div class="aside-card aside-card--soft">
+        <span class="eyebrow">What happens next</span>
+        <ol class="mini-steps">
+          <li><span>1</span><p>The image is resized to 224 × 224 RGB, exactly like training.</p></li>
+          <li><span>2</span><p>The trained network scores all 16 classes with a real forward pass.</p></li>
+          <li><span>3</span><p>Low confidence or poor quality produces an “uncertain” result, not a forced diagnosis.</p></li>
+        </ol>
+      </div>
+      <div class="aside-card aside-card--note">
+        <span class="note-mark">!</span>
+        <p><strong>Confidence is not certainty.</strong> It is the model’s score for one image, not a guarantee that the plant is diseased. Consult an agricultural expert before treatment.</p>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

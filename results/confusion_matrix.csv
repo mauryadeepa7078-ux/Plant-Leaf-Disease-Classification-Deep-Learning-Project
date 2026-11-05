@@ -1,0 +1,17 @@
+,Tomato Healthy,Tomato Early Blight,Tomato Late Blight,Tomato Bacterial Spot,Apple Healthy,Apple Scab,Apple Black Rot,Apple Cedar Apple Rust,Grape Healthy,Grape Black Rot,Grape Esca,Grape Leaf Blight,Corn Healthy,Corn Common Rust,Corn Northern Leaf Blight,Corn Cercospora Leaf Spot
+Tomato Healthy,37,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Tomato Early Blight,2,29,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+Tomato Late Blight,0,4,34,0,0,0,0,0,0,0,0,0,0,0,0,0
+Tomato Bacterial Spot,0,1,1,37,0,0,0,0,0,0,0,0,0,0,0,0
+Apple Healthy,0,0,0,0,36,0,1,0,0,0,0,0,0,0,0,0
+Apple Scab,0,0,0,0,1,35,0,1,0,0,0,0,0,0,0,0
+Apple Black Rot,0,0,0,0,0,0,38,0,0,0,0,0,0,0,0,0
+Apple Cedar Apple Rust,0,0,0,0,0,0,0,36,0,0,0,0,0,0,0,0
+Grape Healthy,0,0,0,0,0,0,0,0,37,0,0,0,0,0,0,0
+Grape Black Rot,0,0,0,0,0,0,0,0,0,36,0,0,0,0,0,0
+Grape Esca,0,0,0,0,0,0,0,0,0,0,37,0,0,0,0,0
+Grape Leaf Blight,0,0,0,0,0,0,0,0,0,0,0,37,0,0,0,0
+Corn Healthy,0,0,0,0,0,0,0,0,0,0,0,0,38,0,0,0
+Corn Common Rust,0,0,0,0,0,0,0,0,0,0,0,0,0,38,0,0
+Corn Northern Leaf Blight,0,0,0,0,0,0,0,0,0,0,0,0,0,0,33,6
+Corn Cercospora Leaf Spot,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,36

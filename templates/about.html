@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-hero page-hero--compact">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="{{ url_for('home') }}">Home</a><span>/</span><span>About</span></nav>
+    <span class="eyebrow">Project notes</span>
+    <h1>A careful classroom model, not a field oracle.</h1>
+    <p class="page-lede">LeafGuard AI is an academic computer-vision project that classifies 16 PlantVillage leaf classes across four crops. It is designed to show a complete, reproducible deep-learning workflow — including its limits.</p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container about-grid">
+    <div class="prose">
+      <span class="eyebrow">Objective</span>
+      <h2>What this project sets out to do</h2>
+      <p>Many plant-disease demos stop at a single crop or hide an untrained frontend behind random labels. LeafGuard AI instead asks a narrower, testable question: can a transfer-learning model separate <strong>16 real PlantVillage classes</strong> across tomato, apple, grape and corn, and report its performance honestly?</p>
+      <p>The project covers the full path from dataset verification, cleaning and leakage-aware splitting through training, held-out evaluation, a real inference pipeline and a Flask interface. The website never invents a prediction: every uploaded image is passed through the saved model.</p>
+
+      <span class="eyebrow">Problem statement</span>
+      <h2>Why multi-plant classification is harder</h2>
+      <p>A tomato-only classifier can learn one leaf shape, one background style and four labels. A 16-class, four-crop model must discriminate diseases that look similar across species while also learning what a healthy leaf looks like for each crop. PlantVillage’s controlled images make that feasible, but they do not represent every field condition.</p>
+
+      <span class="eyebrow">Approach</span>
+      <h2>From verified folders to a measured model</h2>
+      <div class="timeline">
+        <div class="timeline-item"><span>1</span><div><h3>Verify all 16 folders</h3><p>Use the exact PlantVillage folder names. Stop with an explicit error if any class is missing rather than substituting or inventing a label.</p></div></div>
+        <div class="timeline-item"><span>2</span><div><h3>Clean, deduplicate and split</h3><p>Reject corrupt files, remove exact duplicates, group perceptual near-duplicates, resize to 224 × 224 RGB and use StratifiedGroupKFold for 70/15/15 splits.</p></div></div>
+        <div class="timeline-item"><span>3</span><div><h3>Transfer learning</h3><p>Freeze MobileNetV2, extract features with training-only augmentation, then train a regularised classifier head with early stopping, learning-rate reduction and checkpointing.</p></div></div>
+        <div class="timeline-item"><span>4</span><div><h3>Evaluate and connect</h3><p>Score the untouched test split, save confusion matrix and per-class metrics, then load the same saved model in Flask with the same preprocessing.</p></div></div>
+      </div>
+    </div>
+
+    <aside class="about-side">
+      <div class="aside-card">
+        <span class="eyebrow">At a glance</span>
+        <dl class="fact-list">
+          <div><dt>Crops</dt><dd>4</dd></div>
+          <div><dt>Classes</dt><dd>16</dd></div>
+          <div><dt>Input</dt><dd>224 × 224 RGB</dd></div>
+          <div><dt>Backbone</dt><dd>MobileNetV2</dd></div>
+          <div><dt>Framework</dt><dd>TensorFlow / Keras</dd></div>
+          <div><dt>Dataset</dt><dd>{{ summary.total_images if summary.total_images else "PlantVillage subset" }}</dd></div>
+        </dl>
+      </div>
+      <div class="aside-card aside-card--soft">
+        <span class="eyebrow">Source &amp; licence</span>
+        <h3>PlantVillage</h3>
+        <p class="small">Mohanty, Hughes &amp; Salathé (2016), <em>Using Deep Learning for Image-Based Plant Disease Detection</em>, Frontiers in Plant Science 7:1419.</p>
+        <ul class="plain-links">
+          <li><a href="https://github.com/spMohanty/PlantVillage-Dataset" target="_blank" rel="noopener">Official GitHub repository ↗</a></li>
+          <li><a href="https://huggingface.co/datasets/mohanty/PlantVillage" target="_blank" rel="noopener">Hugging Face mirror ↗</a></li>
+          <li><a href="https://doi.org/10.3389/fpls.2016.01419" target="_blank" rel="noopener">Research paper ↗</a></li>
+        </ul>
+        <p class="license-badge">Dataset licence: CC BY-SA 3.0</p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section class="section section--soft">
+  <div class="container">
+    <div class="section-heading centred">
+      <span class="eyebrow">Supported taxonomy</span>
+      <h2>Four plants · sixteen real dataset classes</h2>
+      <p>These are the exact PlantVillage source folders used by the model. Display names are shortened for the interface.</p>
+    </div>
+    <div class="taxonomy-grid">
+      {% for plant in PLANTS %}
+        <article class="taxonomy-card">
+          <h3>{{ plant }} <span>4 classes</span></h3>
+          <table class="taxonomy-table">
+            <thead><tr><th>Display name</th><th>PlantVillage folder</th></tr></thead>
+            <tbody>
+              {% for item in PLANT_CLASSES[plant] %}
+                <tr><td>{{ item.name }}</td><td><code>{{ item.dataset_label }}</code></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </article>
+      {% endfor %}
+    </div>
+    <div class="notice notice--info taxonomy-note">
+      <strong>Corn class note.</strong> PlantVillage’s folder <code>Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot</code> groups Cercospora leaf spot and gray leaf spot. LeafGuard AI displays the brief’s “Corn Cercospora Leaf Spot” label but does not pretend the public dataset separates the two diseases.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container about-grid about-grid--reverse">
+    <div class="prose">
+      <span class="eyebrow">Technology</span>
+      <h2>Tools used end to end</h2>
+      <div class="tech-grid">
+        <div><strong>Python 3.11</strong><span>project language</span></div>
+        <div><strong>TensorFlow / Keras</strong><span>MobileNetV2 transfer learning</span></div>
+        <div><strong>NumPy &amp; Pandas</strong><span>arrays, manifests, reports</span></div>
+        <div><strong>Scikit-learn</strong><span>splits, precision, recall, F1</span></div>
+        <div><strong>Pillow</strong><span>RGB conversion and resizing</span></div>
+        <div><strong>Matplotlib &amp; Seaborn</strong><span>learning curves, confusion matrix</span></div>
+        <div><strong>Flask</strong><span>server-side web application</span></div>
+        <div><strong>HTML, CSS, JavaScript</strong><span>responsive interface</span></div>
+      </div>
+
+      <span class="eyebrow">Reliability</span>
+      <h2>What the confidence score means</h2>
+      <p>Confidence is the softmax score for the highest class. It is not the probability that the plant is truly diseased. A score below 60%, or a top-two margin below 15%, marks the result as uncertain. The app also checks resolution, brightness, contrast and focus before trusting an upload.</p>
+      <p>Even a high-confidence answer can be wrong when the photo differs from the controlled PlantVillage images. That is why every result page includes a limitations reminder and why treatment decisions should be confirmed by an expert.</p>
+    </div>
+
+    <div class="about-side">
+      <div class="aside-card">
+        <span class="eyebrow">Model architecture</span>
+        <ul class="architecture-list">
+          <li><span>Input</span><strong>224 × 224 × 3 RGB</strong></li>
+          <li><span>Augmentation</span><strong>flip, rotate, zoom, translate, contrast, brightness</strong></li>
+          <li><span>Backbone</span><strong>MobileNetV2, ImageNet weights</strong></li>
+          <li><span>Head</span><strong>GAP → Dense 256 → Dropout 0.35</strong></li>
+          <li><span>Output</span><strong>16-class softmax</strong></li>
+          <li><span>Training</span><strong>frozen features + trained classifier head</strong></li>
+        </ul>
+      </div>
+      <div class="aside-card aside-card--note">
+        <span class="note-mark">!</span>
+        <p><strong>Academic disclaimer.</strong> This system is an educational prototype. It is not a replacement for a plant pathologist, agronomist or extension service.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--soft" id="limitations">
+  <div class="container">
+    <div class="section-heading centred">
+      <span class="eyebrow">Limitations &amp; disclaimer</span>
+      <h2>What this model cannot do</h2>
+      <p>These limitations are part of the result, not an afterthought.</p>
+    </div>
+    <div class="limitations-grid">
+      <article><span>01</span><h3>Dataset conditions</h3><p>PlantVillage images were collected under controlled lighting with plain backgrounds. Scores on those images can be much higher than on real farm photos.</p></article>
+      <article><span>02</span><h3>Image dependence</h3><p>Background, lighting, blur, leaf age and camera quality can all change a prediction. The app filters some unusable images, but cannot detect every out-of-distribution photo.</p></article>
+      <article><span>03</span><h3>Similar-looking classes</h3><p>Some diseases have overlapping symptoms, and the corn Cercospora/gray-leaf-spot classes are combined in PlantVillage. The confusion matrix exposes these confusions.</p></article>
+      <article><span>04</span><h3>No field validation</h3><p>The model has not been validated across regions, cultivars, seasons or smartphone cameras. Real deployment would require a field-collected, expert-labelled dataset.</p></article>
+      <article><span>05</span><h3>Not a diagnosis</h3><p>A confidence score is not a guarantee of diagnostic accuracy. Do not use LeafGuard AI alone to decide whether to apply pesticide or destroy a crop.</p></article>
+      <article><span>06</span><h3>Educational scope</h3><p>The project demonstrates a deep-learning workflow for learning and assessment. It is not a commercial decision-support system.</p></article>
+    </div>
+    <div class="disclaimer-band">
+      <strong>Use responsibly.</strong> Always confirm a suspected disease with a qualified agricultural professional and follow local extension guidance. Pesticide use should comply with the product label and local regulations.
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container cta-band">
+    <div>
+      <span class="eyebrow">Explore the evidence</span>
+      <h2>See how the model actually performs.</h2>
+      <p>Test accuracy, per-class F1 and the confusion matrix are one click away.</p>
+    </div>
+    <a class="button button--primary button--large" href="{{ url_for('performance') }}">Open model performance <span>→</span></a>
+  </div>
+</section>
+{% endblock %}

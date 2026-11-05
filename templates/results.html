@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-hero page-hero--compact result-hero">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="{{ url_for('home') }}">Home</a><span>/</span><a href="{{ url_for('detect') }}">Detect</a><span>/</span><span>Result</span></nav>
+    <div class="result-heading">
+      <div>
+        <span class="eyebrow">Analysis complete</span>
+        <h1>
+          {% if prediction.is_uncertain %}Needs a closer look{% else %}{{ prediction.plant }} · {{ prediction.disease }}{% endif %}
+        </h1>
+        <p class="page-lede">
+          {% if prediction.is_uncertain %}
+            The model is not confident enough to make a reliable call from this image.
+          {% else %}
+            The trained model’s leading prediction for this leaf is shown below, with its confidence and alternatives.
+          {% endif %}
+        </p>
+      </div>
+      <span class="status-pill {{ 'status-pill--warn' if prediction.is_uncertain else 'status-pill--ok' }}">
+        <span class="status-dot"></span>{{ "Uncertain result" if prediction.is_uncertain else "Confident prediction" }}
+      </span>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container result-layout">
+    <div class="result-visual">
+      <figure class="result-image-card">
+        <img src="{{ url_for('static', filename='uploads/' ~ result.image_filename) }}" alt="Uploaded leaf photo">
+        <figcaption>
+          <span>{{ result.upload_metadata.filename }}</span>
+          <span>{{ result.upload_metadata.width }} × {{ result.upload_metadata.height }} px</span>
+        </figcaption>
+      </figure>
+
+      <div class="quality-card">
+        <div class="quality-card__heading">
+          <h3>Image quality check</h3>
+          <span class="quality-score {{ 'is-low' if prediction.quality.quality_score < 60 }}">{{ prediction.quality.quality_score|int }}/100</span>
+        </div>
+        <dl class="quality-grid">
+          <div><dt>Brightness</dt><dd>{{ prediction.quality.brightness|int }}</dd></div>
+          <div><dt>Contrast</dt><dd>{{ prediction.quality.contrast|int }}</dd></div>
+          <div><dt>Focus score</dt><dd>{{ "%.4f"|format(prediction.quality.focus_score) }}</dd></div>
+          <div><dt>Leaf colour</dt><dd>{{ "%.0f"|format(prediction.quality.get('leaf_colour_ratio', 0) * 100) }}%</dd></div>
+          <div><dt>Resolution</dt><dd>{{ prediction.quality.width }} × {{ prediction.quality.height }}</dd></div>
+          <div><dt>Inference</dt><dd>{{ prediction.latency_ms|int }} ms</dd></div>
+        </dl>
+        {% if prediction.quality.warnings %}
+          <ul class="quality-warnings">
+            {% for warning in prediction.quality.warnings %}<li>{{ warning }}</li>{% endfor %}
+          </ul>
+        {% else %}
+          <p class="quality-ok">No basic image-quality problems detected.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="result-main">
+      {% if prediction.is_uncertain %}
+        <div class="notice notice--warning notice--large">
+          <strong>Why this is marked uncertain</strong>
+          <ul>
+            {% for reason in prediction.uncertainty_reasons %}<li>{{ reason }}</li>{% endfor %}
+          </ul>
+          <p>Try a sharper, evenly lit photo showing one leaf, or use the result as a prompt to ask an agricultural expert. Do not treat this as a diagnosis.</p>
+        </div>
+      {% endif %}
+
+      {% if prediction.plant_mismatch %}
+        <div class="notice notice--info">
+          <strong>Plant mismatch.</strong> You selected <b>{{ prediction.selected_plant }}</b>, but the model’s top class is <b>{{ prediction.plant }}</b>. The model always reports its global 16-class prediction; check the plant selection and image.
+        </div>
+      {% endif %}
+
+      <div class="prediction-card">
+        <div class="prediction-card__top">
+          <div>
+            <span class="eyebrow">{{ "Most likely candidate" if prediction.is_uncertain else "Predicted condition" }}</span>
+            <h2>{{ prediction.class_name }}</h2>
+            <p class="prediction-plant">{{ prediction.plant }} · {{ prediction.disease }}</p>
+          </div>
+          <div class="confidence-ring" style="--confidence: {{ prediction.confidence }}%">
+            <div class="confidence-ring__inner">
+              <strong>{{ "%.1f"|format(prediction.confidence) }}<small>%</small></strong>
+              <span>confidence</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="top-predictions">
+          <div class="top-predictions__heading">
+            <h3>Model’s top 3</h3>
+            <span>Uncertainty threshold: {{ prediction.thresholds.confidence|int }}%</span>
+          </div>
+          {% for item in prediction.top_predictions %}
+            <div class="probability-row">
+              <div class="probability-label">
+                <span>{{ item.name }}</span>
+                <strong>{{ "%.2f"|format(item.probability) }}%</strong>
+              </div>
+              <div class="probability-track"><span style="width: {{ item.probability }}%"></span></div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card__heading">
+          <span class="info-icon">i</span>
+          <div>
+            <h2>{{ "About this condition" if not prediction.is_healthy else "A healthy reference leaf" }}</h2>
+            <p>{{ prediction.info.summary }}</p>
+          </div>
+        </div>
+        <p class="info-description">{{ prediction.info.description }}</p>
+
+        <div class="info-grid">
+          <div class="info-block">
+            <h3>Typical signs</h3>
+            <p>{{ prediction.info.symptoms }}</p>
+          </div>
+          <div class="info-block">
+            <h3>What causes it</h3>
+            <p>{{ prediction.info.cause }}</p>
+          </div>
+          <div class="info-block info-block--wide">
+            <h3>General prevention &amp; care</h3>
+            <ul class="prevention-list">
+              {% for tip in prediction.info.prevention %}<li><span>✓</span>{{ tip }}</li>{% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <a class="button button--primary" href="{{ url_for('detect') }}">Analyse another leaf</a>
+        <a class="button button--ghost" href="{{ url_for('performance') }}">View model performance</a>
+      </div>
+
+      <p class="result-disclaimer">This is an academic prototype result, not a laboratory test or professional diagnosis. Image background, lighting and disease stage can change the prediction. Consult a qualified agricultural professional before applying treatment.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

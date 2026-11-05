@@ -1,0 +1,25 @@
+{
+  "source": "https://github.com/spMohanty/PlantVillage-Dataset",
+  "license": "CC BY-SA 3.0",
+  "seed": 42,
+  "per_class": 250,
+  "total_downloaded": 4000,
+  "classes": {
+    "Apple Black Rot": 250,
+    "Apple Cedar Apple Rust": 250,
+    "Apple Healthy": 250,
+    "Apple Scab": 250,
+    "Corn Cercospora Leaf Spot": 250,
+    "Corn Common Rust": 250,
+    "Corn Healthy": 250,
+    "Corn Northern Leaf Blight": 250,
+    "Grape Black Rot": 250,
+    "Grape Esca": 250,
+    "Grape Healthy": 250,
+    "Grape Leaf Blight": 250,
+    "Tomato Bacterial Spot": 250,
+    "Tomato Early Blight": 250,
+    "Tomato Healthy": 250,
+    "Tomato Late Blight": 250
+  }
+}

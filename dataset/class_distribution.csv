@@ -1,0 +1,17 @@
+plant,class_name,dataset_label,train,validation,test,total
+Apple,Apple Black Rot,Apple___Black_rot,175,37,38,250
+Apple,Apple Cedar Apple Rust,Apple___Cedar_apple_rust,176,38,36,250
+Apple,Apple Healthy,Apple___healthy,174,39,37,250
+Apple,Apple Scab,Apple___Apple_scab,175,38,37,250
+Corn,Corn Cercospora Leaf Spot,Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot,176,36,38,250
+Corn,Corn Common Rust,Corn_(maize)___Common_rust_,175,37,38,250
+Corn,Corn Healthy,Corn_(maize)___healthy,176,36,38,250
+Corn,Corn Northern Leaf Blight,Corn_(maize)___Northern_Leaf_Blight,174,37,39,250
+Grape,Grape Black Rot,Grape___Black_rot,175,39,36,250
+Grape,Grape Esca,Grape___Esca_(Black_Measles),175,38,37,250
+Grape,Grape Healthy,Grape___healthy,175,38,37,250
+Grape,Grape Leaf Blight,Grape___Leaf_blight_(Isariopsis_Leaf_Spot),176,37,37,250
+Tomato,Tomato Bacterial Spot,Tomato___Bacterial_spot,172,39,39,250
+Tomato,Tomato Early Blight,Tomato___Early_blight,177,36,37,250
+Tomato,Tomato Healthy,Tomato___healthy,175,38,37,250
+Tomato,Tomato Late Blight,Tomato___Late_blight,175,37,38,250
